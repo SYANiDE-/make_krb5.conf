@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
 import os, sys, argparse, configparser
-from IPython import embed
 
 def getargs():
     AP = argparse.ArgumentParser(description="Make entries for /etc/krb5.conf, optionally write a new one")
@@ -22,8 +21,10 @@ def formatter(dcs):
         if nextdc is None:
             break
         index, dc = nextdc
+        kdc_port=dc.split(":")[1] if len(dc.split(":")) > 1 else "88"
         dchost = dc.split(".")[0]
         dcdomain = '.'.join(dc.split(".")[1:])
+        dc_lower=dchost.lower()
         dc_upper=dchost.upper()
         domain_lower=dcdomain.lower()
         domain_upper=dcdomain.upper()
@@ -31,10 +32,10 @@ def formatter(dcs):
             default_realm = domain_upper
         entry = "\n".join([x[indent:] for x in f"""\
             {domain_upper} = {{
-                kdc = {dc_upper}.{domain_upper}
-                admin_server = {dc_upper}.{domain_upper}
-                password_server = {dc_upper}.{domain_upper}
-                default_domain = {domain_upper}
+                kdc = {dc_lower}.{domain_lower}:88
+                admin_server = {dc_lower}.{domain_lower}
+                password_server = {dc_lower}.{domain_lower}
+                default_domain = {domain_lower}
             }}\
         """.split("\n")])
         mapping = "\n".join([x[indent:] for x in f"""\
